@@ -8,6 +8,35 @@ import json
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# --- REQUISITO RF09 e RF10: Estrutura de Classes e Herança ---
+
+# Classe Mãe (Base para a análise)
+class AnaliseBase:
+    def __init__(self, caminho_arquivo):
+        self.caminho_arquivo = caminho_arquivo
+        self.df = None
+
+    def carregar_dados(self):
+        # Aqui já cumpre parte do RF01 (Carregar Dataset)
+        import pandas as pd
+        self.df = pd.read_csv(self.caminho_arquivo)
+        print("Dados carregados com sucesso pela classe base!")
+
+# Classe Filha (Herda tudo da AnaliseBase) - Aqui ocorre a HERANÇA
+class PipelineVendas(AnaliseBase):
+
+    def executar_limpeza(self):
+        print("Iniciando a limpeza e transformação dos dados...")
+        
+        # --- REQUISITO RF13: Expressões Regulares (Regex) ---
+        import re
+        self.df['regiao'] = self.df['regiao'].apply(lambda x: re.sub(r'[^a-zA-Z0-9\s]', '', str(x)).strip())
+        
+        # --- REQUISITO RF11: Função Lambda e Função de Ordem Superior ---
+        self.df['categoria_padronizada'] = self.df['categoria'].apply(lambda x: str(x).upper())
+        self.df.to_json('vendas_limpas.json', orient='records', indent=4)
+        print("Limpeza com Regex e Lambda concluída com sucesso!")
+
 # =========================================================================
 # RF01 DATASET DE VENDAS
 # =========================================================================
@@ -298,4 +327,12 @@ if __name__ == "__main__":
     exportar_resultados(df_vendas_filtrado)
     # Passo 8: Gera gráficos visuais de performance (RF08)
     gerar_graficos(df_vendas_filtrado)
+
+# --- Executando o Pipeline com a Classe Nova ---
+if __name__ == "__main__":
+    # Instanciando a classe filha com o seu arquivo de vendas
+    pipeline = PipelineVendas('vendas.csv')
     
+    # Executando os métodos herdados e criados
+    pipeline.carregar_dados()
+    pipeline.executar_limpeza()   
